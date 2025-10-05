@@ -95,7 +95,7 @@
                 <div class="row justify-content-center mb-4">
                     <div class="col-md-8">
                         <div class="input-group shadow-sm">
-                            <input type="text" id="searchBox" class="form-control" placeholder="Search by Email, Mobile or Address..." style="border: 2px solid #53a0d8;">
+                            <input type="text" id="searchBox" class="form-control" placeholder="Search by Name, Qualification or Address..." style="border: 2px solid #53a0d8;">
                             <div class="input-group-append">
                                 <span class="input-group-text" style="background-color:#53a0d8; color:white; font-weight:bold;">🔍</span>
                             </div>
@@ -112,6 +112,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Name</th>
+                                        <th>Qualification</th>
                                         <th>Address</th>
                                     </tr>
                                 </thead>
@@ -205,6 +206,7 @@
                     <tr>
                         <td>${index + 1}</td>
                         <td>${item.name || ''}</td>
+                        <td>${item.qualification || ''}</td>
                         <td>${item.address || ''}</td>
                     </tr>
                 `);
