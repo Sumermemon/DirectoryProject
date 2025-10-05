@@ -47,6 +47,15 @@ namespace DirectoryProject.Controllers
             }
             return View();
         }
+        public IActionResult CardPanel()
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if (email == null)
+            {
+                return RedirectToAction("Index");
+            }
+            return View();
+        }
         #region [Destination Methods]
         [HttpGet]
         public async Task<IActionResult> users()
@@ -124,7 +133,7 @@ namespace DirectoryProject.Controllers
         {
             var respdata = new ResponseModel<List<DirectoryMaster>>();
             respdata = await _adminRepo.GetAllDirectory();
-            return Json(respdata);
+            return Json(new { data = respdata.data});
         }
 
         [HttpGet]

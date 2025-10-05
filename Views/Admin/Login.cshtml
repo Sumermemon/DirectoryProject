@@ -139,7 +139,7 @@
             $.post("/Account/VerifyOtp", { email: email, otp: otp }, function (res) {
                 if (res.success) {
                     alert("Login successful!");
-                    window.location.href = "/Admin/Users";
+                    window.location.href = "/Admin/CardPanel";
                 } else {
                     alert(res.message || "Invalid OTP");
                 }

@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     Layout = null;
 }
 <!DOCTYPE html>
@@ -102,26 +101,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Table -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-responsive shadow-sm">
-                            <table class="table table-bordered table-striped text-center" style="background:white;">
-                                <thead style="background:#53a0d8; color:white;">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Name</th>
-                                        <th>Address</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dataTable">
-                                    
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </div>
@@ -168,59 +147,3 @@
 </html>
 
 
-
-<script>
-    $(document).ready(function () {
-        let allData = []; // store all data from API
-        let currentData = []; // currently displayed data
-        const rowsPerPage = 10;
-
-        // 🔹 Fetch all directory data once
-        $.ajax({
-            url: '/Admin/GetAllDirectory',
-            method: 'GET',
-            success: function (response) {
-                if (response && response.data) {
-                    allData = response.data;
-                    renderTable(allData.slice(0, rowsPerPage)); // show first 10
-                }
-            },
-            error: function () {
-                alert("Failed to load directory data.");
-            }
-        });
-
-        // 🔹 Render table rows dynamically
-        function renderTable(data) {
-            const tbody = $("#dataTable");
-            tbody.empty();
-
-            if (data.length === 0) {
-                tbody.append(`<tr><td colspan="4">No records found</td></tr>`);
-                return;
-            }
-
-            data.forEach((item, index) => {
-                tbody.append(`
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.name || ''}</td>
-                        <td>${item.address || ''}</td>
-                    </tr>
-                `);
-            });
-        }
-
-        // 🔹 Live search filter (client-side only)
-        $("#searchBox").on("keyup", function () {
-            const value = $(this).val().toLowerCase();
-
-            const filtered = allData.filter(item =>
-                (item.name && item.name.toLowerCase().includes(value)) ||
-                (item.address && item.address.toLowerCase().includes(value))
-            );
-
-            renderTable(filtered.slice(0, rowsPerPage));
-        });
-    });
-</script>
