@@ -92,13 +92,22 @@
                 <input type="text" maxlength="1" class="otp-input" id="otp4">
             </div>
             <button class="btn btn-custom btn-block mt-3">Verify OTP</button>
+            <a class="btn" onclick="sendOtp()">Resnd OTP</a>
+            <span id="timerText" class="ml-2 text-muted"></span>
         </div>
     </div>
 
     <script>
+        let countdownInterval;
         function showOtp() {
+            let email = $("#email").val();
+            if (!email){
+                return alert("Enter Email");
+            }else{
           document.getElementById("emailSection").style.display = "none";
           document.getElementById("otpSection").style.display = "block";
+          sendOtp();
+            }
         }
 
         function moveNext(current, nextId) {
@@ -106,19 +115,22 @@
             document.getElementById(nextId).focus();
           }
         }
-                function sendOtp() {
+        function sendOtp() {
             let email = $("#email").val();
-            if (!email) return alert("Enter Email");
-
-            $.post("/Account/SendOtp", { email: email }, function (res) {
-                if (res.success) {
-                    alert("OTP sent to your email!");
-                    $("#emailSection").hide();
-                    $("#otpSection").show();
-                } else {
-                    alert(res.message || "Error sending OTP");
-                }
-            });
+            if (!email){
+                return alert("Enter Email");
+            }else{
+                $.post("/Account/SendOtp", { email: email }, function (res) {
+                    if (res.success) {
+                        alert("OTP sent to your email!");
+                        $("#emailSection").hide();
+                        $("#otpSection").show();
+                        startTimer(300); // start 5-minute timer (300 seconds)
+                    } else {
+                        alert(res.message || "Error sending OTP");
+                    }
+                });
+            }
         }
                 function verifyOtp() {
             let otp = $("#otp1").val() + $("#otp2").val() + $("#otp3").val() + $("#otp4").val();
@@ -127,12 +139,36 @@
             $.post("/Account/VerifyOtp", { email: email, otp: otp }, function (res) {
                 if (res.success) {
                     alert("Login successful!");
-                    window.location.href = "/Home/Index";
+                    window.location.href = "/Admin/Users";
                 } else {
                     alert(res.message || "Invalid OTP");
                 }
             });
         }
+        function startTimer(duration) {
+          let timer = duration;
+          $("#resendBtn").addClass("disabled");
+          $("#timerText").text(formatTime(timer));
+
+          clearInterval(countdownInterval);
+          countdownInterval = setInterval(() => {
+            timer--;
+            $("#timerText").text(formatTime(timer));
+
+            if (timer <= 0) {
+              clearInterval(countdownInterval);
+              $("#timerText").text("");
+              $("#resendBtn").removeClass("disabled");
+            }
+          }, 1000);
+        }
+
+        function formatTime(seconds) {
+          let minutes = Math.floor(seconds / 60);
+          let sec = seconds % 60;
+          return `(${minutes}:${sec < 10 ? "0" + sec : sec})`;
+        }
+
     </script>
 
 </body>

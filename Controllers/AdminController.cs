@@ -2,6 +2,7 @@
 using DirectoryProject.Layer.Interface;
 using DirectoryProject.Models;
 using DirectoryProject.ViewModel;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
@@ -22,6 +23,11 @@ namespace DirectoryProject.Controllers
         }
         public IActionResult Users()
         {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if(email == null)
+            {
+                return RedirectToAction("Index");
+            }
             return View();
         }
         public IActionResult Directory()
@@ -34,6 +40,11 @@ namespace DirectoryProject.Controllers
         }
         public IActionResult PageDirectory()
         {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if (email == null)
+            {
+                return RedirectToAction("Index");
+            }
             return View();
         }
         #region [Destination Methods]
