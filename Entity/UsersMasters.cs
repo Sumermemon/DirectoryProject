@@ -18,6 +18,8 @@ namespace DirectoryProject.Entity
         public string? RegNo  { get; set; }
         public string? GTMDANo  { get; set; }
         public bool IsActive { get; set; }
+        public string? OTP { get; set; }
+        public DateTime? OTPExpire { get; set; }
 
     }
 }

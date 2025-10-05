@@ -1,16 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DirectoryProject.DBHelper;
+using DirectoryProject.Entity;
+using DirectoryProject.Layer.Interface;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace DirectoryProject.Controllers
 {
     public class AccountController : Controller
     {
         private readonly IMemoryCache _cache;
-        public AccountController(IMemoryCache cache)
+        private readonly AppDBContext _dbContext;
+        public AccountController(IMemoryCache cache, AppDBContext dbcontext)
         {
             _cache = cache;
+            _dbContext = dbcontext;
         }
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
@@ -40,7 +48,14 @@ namespace DirectoryProject.Controllers
                     smtp.EnableSsl = true;
                     await smtp.SendMailAsync(mail);
                 }
-
+                var user = await _dbContext.UsersMasters.FirstOrDefaultAsync(x => x.Email == email);
+                if (user != null)
+                {
+                    user.OTPExpire = DateTime.Now.AddMinutes(5);
+                    user.OTP = otp;
+                    _dbContext.UsersMasters.Add(user);
+                    _dbContext.SaveChanges();
+                }
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -50,16 +65,17 @@ namespace DirectoryProject.Controllers
         }
 
         [HttpPost]
-        public IActionResult VerifyOtp(string email, string otp)
+        public async Task<IActionResult> VerifyOtp(string email, string otp)
         {
-            if (_cache.TryGetValue(email, out string savedOtp))
+            if(!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(otp))
             {
-                if (savedOtp == otp)
+                var user = await _dbContext.UsersMasters.FirstOrDefaultAsync(x => x.Email == email && x.OTP == otp && x.OTPExpire > DateTime.Now);
+                if(user == null)
                 {
-                    _cache.Remove(email);
-                    HttpContext.Session.SetString("UserEmail", email);
-                    return Json(new { success = true });
+                    return Json(new { success = false, message = "Invalid or expired OTP" });
                 }
+                HttpContext.Session.SetString("UserEmail", email);
+                return Json(new { success = true });
             }
             return Json(new { success = false, message = "Invalid or expired OTP" });
         }
