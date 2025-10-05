@@ -15,10 +15,12 @@ namespace DirectoryProject.Controllers
     {
         private readonly IMemoryCache _cache;
         private readonly AppDBContext _dbContext;
-        public AccountController(IMemoryCache cache, AppDBContext dbcontext)
+        private readonly IConfiguration _config;
+        public AccountController(IMemoryCache cache, AppDBContext dbcontext, IConfiguration config)
         {
             _cache = cache;
             _dbContext = dbcontext;
+            _config = config;
         }
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
@@ -37,14 +39,14 @@ namespace DirectoryProject.Controllers
 
                 // Send email (replace credentials)
                 var mail = new MailMessage();
-                mail.From = new MailAddress("yourgmail@gmail.com");
+                mail.From = new MailAddress(_config.GetSection("Email:FromAddress")!.Value!, _config.GetSection("Email:FromName").Value);
                 mail.To.Add(email);
                 mail.Subject = "Your OTP Code";
                 mail.Body = $"Your OTP is {otp}";
 
-                using (var smtp = new SmtpClient("smtp.gmail.com", 587))
+                using (var smtp = new SmtpClient(_config.GetSection("Email:SmtpHost").Value, Convert.ToInt32(_config.GetSection("Email:SmtpPort").Value)))
                 {
-                    smtp.Credentials = new NetworkCredential("yourgmail@gmail.com", "your-app-password");
+                    smtp.Credentials = new NetworkCredential(_config.GetSection("Email:Username").Value, _config.GetSection("Email:Password").Value);
                     smtp.EnableSsl = true;
                     await smtp.SendMailAsync(mail);
                 }
@@ -53,8 +55,8 @@ namespace DirectoryProject.Controllers
                 {
                     user.OTPExpire = DateTime.Now.AddMinutes(5);
                     user.OTP = otp;
-                    _dbContext.UsersMasters.Add(user);
-                    _dbContext.SaveChanges();
+                    await _dbContext.UsersMasters.AddAsync(user);
+                    await _dbContext.SaveChangesAsync();
                 }
                 return Json(new { success = true });
             }
