@@ -10,11 +10,9 @@ namespace DirectoryProject.Entity
         [Key]
         public int Id { get; set; }
         public string? Name { get; set; }
-        public string? Gender { get; set; }
         public string? Qualification { get; set; }
-        public int? RegNo { get; set; }
-        public string Address1 { get; set; }
-        public string Address2 { get; set; }
+        public string? GTMDANo { get; set; }
+        public string Address { get; set; }
         public string? MobileNo { get; set; }
         public bool IsActive { get; set; }
     }
