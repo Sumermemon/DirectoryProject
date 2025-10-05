@@ -50,10 +50,24 @@
     <div class="container mt-5">
         <div class="card shadow rounded-3">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">User Management</h4>
-                <button class="btn btn-sm btn-light text-primary fw-bold" onclick="openUserModal()">
-                    <i class="fa fa-plus me-1"></i> Add User
-                </button>
+
+                <!-- Left Buttons -->
+                <div class="d-flex gap-2">
+                    <a href="/Admin/Index" class="btn btn-sm btn-light text-primary fw-bold">
+                        <i class="fa fa-home me-1"></i> Home
+                    </a>
+                    <a href="/Admin/PageDirectory" class="btn btn-sm btn-light text-primary fw-bold">
+                        <i class="fa fa-folder-open me-1"></i> Directory
+                    </a>
+                </div>
+
+                <!-- Title and Add Button (Right Side) -->
+                <div class="d-flex align-items-center gap-3">
+                    <h4 class="mb-0">User Management</h4>
+                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="openUserModal()">
+                        <i class="fa fa-plus me-1"></i> Add User
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">

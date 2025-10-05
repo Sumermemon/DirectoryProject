@@ -38,14 +38,16 @@ namespace DirectoryProject.Controllers
         {
             return View();
         }
-        public IActionResult PageDirectory()
+        public async Task<IActionResult> PageDirectory()
         {
             var email = HttpContext.Session.GetString("UserEmail");
             if (email == null)
             {
                 return RedirectToAction("Index");
             }
-            return View();
+            var respdata = new ResponseModel<List<DirectoryMaster>>();
+            respdata = await _adminRepo.GetAllDirectory();
+            return View(respdata);
         }
         public IActionResult CardPanel()
         {
@@ -133,14 +135,13 @@ namespace DirectoryProject.Controllers
         {
             var respdata = new ResponseModel<List<DirectoryMaster>>();
             respdata = await _adminRepo.GetAllDirectory();
-            return Json(new { data = respdata.data});
+            return Json(respdata);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetDirectoryById(int id)
         {
-            var respdata = new ResponseModel<DirectoryMaster>();
-            respdata = await _adminRepo.GetDirectoryById(id);
+            var respdata = await _adminRepo.GetDirectoryById(id);
             return Json(respdata);
         }
 

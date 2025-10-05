@@ -1,15 +1,276 @@
-﻿
-@{
-    Layout = null;
-}
+﻿@using DirectoryProject.Entity
+@model ResponseModel<List<DirectoryMaster>>
+<body class="bg-light">
 
-<!DOCTYPE html>
+    <div class="container mt-5">
+        <div class="card shadow rounded-3">
 
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>CrudDirectory</title>
-</head>
-<body>
+            <!-- Header -->
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <!-- Left Buttons -->
+                <div class="d-flex gap-2">
+                    <a href="/Admin/Index" class="btn btn-sm btn-light text-primary fw-bold">
+                        <i class="fa fa-home me-1"></i> Home
+                    </a>
+                    <a href="/Admin/Users" class="btn btn-sm btn-light text-primary fw-bold">
+                        <i class="fa fa-users me-1"></i> Users
+                    </a>
+                </div>
+
+                <!-- Right Add Button -->
+                <div class="d-flex align-items-center gap-3">
+                    <h4 class="mb-0">Directory Management</h4>
+                    <button class="btn btn-sm btn-light text-primary fw-bold" data-bs-toggle="modal" data-bs-target="#directoryModal">
+                        <i class="fa fa-plus me-1"></i> Add Directory
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Body -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="directoryTable">
+                        <thead class="table-primary text-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Qualification</th>
+                                <th>RegNo</th>
+                                <th>Address-1</th>
+                                <th>Address-2</th>
+                                <th>MobileNo</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Success && Model.data is not null && Model.data.Count > 0)
+                            {
+                                @for (int i = 0; i < Model.data.Count; i++)
+                                {
+                                    var dir = Model.data[i];
+                                    <tr>
+                                        <td>@(i + 1)</td>
+                                        <td>@dir.Name</td>
+                                        <td>@dir.Gender</td>
+                                        <td>@dir.Qualification</td>
+                                        <td>@dir.RegNo</td>
+                                        <td>@dir.Address1</td>
+                                        <td>@dir.Address2</td>
+                                        <td>@dir.MobileNo</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info me-1" onclick="editDirectory(@dir.Id)">
+                                                <i class="fa fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteDirectory(@dir.Id)">
+                                                <i class="fa fa-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="9" class="text-center text-danger py-3 fw-bold">
+                                        No directories found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Directory Modal -->
+    <div class="modal fade" id="directoryModal" tabindex="-1" aria-labelledby="directoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="directoryModalLabel">Add Directory</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="directoryForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Name</label>
+                                <input type="text" class="form-control" id="Name" placeholder="Enter name" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Gender</label>
+                                <select class="form-select" id="Gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Qualification</label>
+                                <input type="text" class="form-control" id="Qualification" placeholder="Enter qualification" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">RegNo</label>
+                                <input type="number" class="form-control" id="RegNo" placeholder="Enter registration number" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Address - 1</label>
+                                <input type="text" class="form-control" id="Address1" placeholder="Enter address line 1" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Address - 2</label>
+                                <input type="text" class="form-control" id="Address2" placeholder="Enter address line 2" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Mobile No</label>
+                                <input type="text" class="form-control" id="MobileNo" placeholder="Enter mobile number" />
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center mt-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="IsActive" checked>
+                                    <label class="form-check-label fw-bold" for="IsActive">Active</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDirectory()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="DirectoryId" />
+
 </body>
-</html>
+    <!-- Bootstrap + Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+async function saveDirectory() {
+        const id = document.getElementById("DirectoryId").value;
+            const data = {
+                    Id: id ? parseInt(id) : 0,
+                    Name: document.getElementById("Name").value.trim(),
+                Gender: document.getElementById("Gender").value.trim(),
+                Qualification: document.getElementById("Qualification").value.trim(),
+                RegNo: document.getElementById("RegNo").value.trim(),
+                Address1: document.getElementById("Address1").value.trim(),
+                Address2: document.getElementById("Address2").value.trim(),
+                MobileNo: document.getElementById("MobileNo").value.trim(),
+                IsActive: document.getElementById("IsActive").checked
+            };
+
+            // ✅ Required fields validation
+            if (!data.Name) {
+                alert("Please enter Name.");
+                return;
+            }
+            if (!data.Gender) {
+                alert("Please select Gender.");
+                return;
+            }
+            if (!data.Address1) {
+                alert("Please enter Address Line 1.");
+                return;
+            }
+            if (!data.MobileNo) {
+                alert("Please enter Mobile Number.");
+                return;
+            }
+
+            try {
+                // ✅ Backend API call
+                const response = await fetch("/Admin/AddDirectory", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to save directory. Please try again.");
+                }
+
+                const result = await response.json();
+
+                // ✅ Check result (you can modify this based on your repo response)
+                if (result.success) {
+                    alert("✅ Directory saved successfully!");
+                } else {
+                    alert("⚠️ Failed to save directory: " + (result.message || "Unknown error"));
+                }
+
+                // ✅ Close Modal and Reset Form
+                const modal = bootstrap.Modal.getInstance(document.getElementById("directoryModal"));
+                modal.hide();
+                document.getElementById("directoryForm").reset();
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("❌ Something went wrong while saving the directory.");
+            }
+        }
+
+    </script>
+<script>
+    async function editDirectory(id) {
+        const response = await fetch(`/Admin/GetDirectoryById?id=${id}`);
+        const result = await response.json(); // 👈 outer object (success, message, data)
+        const data = result.data;             // 👈 actual directory object
+
+        // Fill form fields
+        document.getElementById("Name").value = data.name || "";
+        document.getElementById("Gender").value = data.gender || "";
+        document.getElementById("Qualification").value = data.qualification || "";
+        document.getElementById("RegNo").value = data.regNo || "";
+        document.getElementById("Address1").value = data.address1 || "";
+        document.getElementById("Address2").value = data.address2 || "";
+        document.getElementById("MobileNo").value = data.mobileNo || "";
+        document.getElementById("IsActive").checked = data.isActive === true;
+
+        document.getElementById("directoryModalLabel").innerText = "Edit Directory";
+
+        // Hidden ID field
+        let hidden = document.getElementById("DirectoryId");
+        if (!hidden) {
+            hidden = document.createElement("input");
+            hidden.type = "hidden";
+            hidden.id = "DirectoryId";
+            document.getElementById("directoryForm").appendChild(hidden);
+        }
+        hidden.value = data.id;
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById("directoryModal"));
+        modal.show();
+    }
+</script>
+
+<script>
+        async function deleteDirectory(id) {
+        if (!confirm("Are you sure you want to delete this directory?")) return;
+
+        const response = await fetch(`/Admin/DeleteDirectoryById?id=${id}`, {
+            method: "POST"
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("✅ Directory deleted successfully!");
+            location.reload();
+        } else {
+            alert("⚠️ Failed to delete directory: " + (result.message || "Unknown error"));
+        }
+    }
+
+</script>
