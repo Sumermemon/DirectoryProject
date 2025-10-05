@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login with OTP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #53a0d8, #ffffff);
+            font-family: 'Roboto', sans-serif;
+            /* 🔹 Centering the box */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+            margin: 0;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 80px auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
+        }
+
+            .login-box h2 {
+                text-align: center;
+                margin-bottom: 25px;
+                color: #53a0d8;
+                font-weight: bold;
+            }
+
+        .otp-input {
+            width: 55px;
+            height: 55px;
+            text-align: center;
+            font-size: 22px;
+            margin: 0 5px;
+            border: 2px solid #53a0d8;
+            border-radius: 8px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+            .otp-input:focus {
+                border-color: #2d77b8;
+                box-shadow: 0px 0px 8px rgba(83,160,216,0.6);
+            }
+
+        .btn-custom {
+            background-color: #53a0d8;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+            .btn-custom:hover {
+                background-color: #2d77b8;
+            }
+
+        .otp-box {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h2>Login</h2>
+        <!-- Email Section -->
+        <div id="emailSection">
+            <div class="form-group">
+                <label for="email">Enter your Email</label>
+                <input type="email" id="email" class="form-control" placeholder="example@email.com">
+            </div>
+            <button class="btn btn-custom btn-block" onclick="showOtp()">Send OTP</button>
+        </div>
+
+        <!-- OTP Section -->
+        <div id="otpSection" class="otp-box">
+            <h5>Enter OTP</h5>
+            <div class="d-flex justify-content-center">
+                <input type="text" maxlength="1" class="otp-input" oninput="moveNext(this, 'otp2')" id="otp1">
+                <input type="text" maxlength="1" class="otp-input" oninput="moveNext(this, 'otp3')" id="otp2">
+                <input type="text" maxlength="1" class="otp-input" oninput="moveNext(this, 'otp4')" id="otp3">
+                <input type="text" maxlength="1" class="otp-input" id="otp4">
+            </div>
+            <button class="btn btn-custom btn-block mt-3">Verify OTP</button>
+        </div>
+    </div>
+
+    <script>
+        function showOtp() {
+          document.getElementById("emailSection").style.display = "none";
+          document.getElementById("otpSection").style.display = "block";
+        }
+
+        function moveNext(current, nextId) {
+          if (current.value.length == 1) {
+            document.getElementById(nextId).focus();
+          }
+        }
+                function sendOtp() {
+            let email = $("#email").val();
+            if (!email) return alert("Enter Email");
+
+            $.post("/Account/SendOtp", { email: email }, function (res) {
+                if (res.success) {
+                    alert("OTP sent to your email!");
+                    $("#emailSection").hide();
+                    $("#otpSection").show();
+                } else {
+                    alert(res.message || "Error sending OTP");
+                }
+            });
+        }
+                function verifyOtp() {
+            let otp = $("#otp1").val() + $("#otp2").val() + $("#otp3").val() + $("#otp4").val();
+            let email = $("#email").val();
+
+            $.post("/Account/VerifyOtp", { email: email, otp: otp }, function (res) {
+                if (res.success) {
+                    alert("Login successful!");
+                    window.location.href = "/Home/Index";
+                } else {
+                    alert(res.message || "Invalid OTP");
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
+
