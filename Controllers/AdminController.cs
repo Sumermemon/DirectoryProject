@@ -32,6 +32,10 @@ namespace DirectoryProject.Controllers
         {
             return View();
         }
+        public IActionResult PageDirectory()
+        {
+            return View();
+        }
         #region [Destination Methods]
         [HttpGet]
         public async Task<IActionResult> users()
