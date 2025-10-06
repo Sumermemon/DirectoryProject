@@ -30,6 +30,11 @@ namespace DirectoryProject.Controllers
                 if (string.IsNullOrEmpty(email))
                     return Json(new { success = false, message = "Email required" });
 
+                var exist = await _dbContext.UsersMasters.FirstOrDefaultAsync(x => x.Email == email);
+                if (exist == null)
+                {
+                    return Json(new { success = false, message = "Invalid Email Id or User Not Valid" });
+                }
                 // Generate OTP
                 Random rnd = new Random();
                 string otp = rnd.Next(1000, 9999).ToString();
