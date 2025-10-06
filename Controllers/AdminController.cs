@@ -53,9 +53,9 @@ namespace DirectoryProject.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
             if (email == null)
-            {
                 return RedirectToAction("Index");
-            }
+
+            ViewBag.IdCard = HttpContext.Session.GetString("IdCard");
             return View();
         }
         #region [Destination Methods]

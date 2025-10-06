@@ -55,7 +55,6 @@ namespace DirectoryProject.Controllers
                 {
                     user.OTPExpire = DateTime.Now.AddMinutes(5);
                     user.OTP = otp;
-                    await _dbContext.UsersMasters.AddAsync(user);
                     await _dbContext.SaveChangesAsync();
                 }
                 return Json(new { success = true });
@@ -76,7 +75,9 @@ namespace DirectoryProject.Controllers
                 {
                     return Json(new { success = false, message = "Invalid or expired OTP" });
                 }
+                HttpContext.Session.SetString("Id", user.Id.ToString());
                 HttpContext.Session.SetString("UserEmail", email);
+                HttpContext.Session.SetString("IdCard", user.IdCard??"");
                 return Json(new { success = true });
             }
             return Json(new { success = false, message = "Invalid or expired OTP" });

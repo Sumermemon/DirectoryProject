@@ -20,6 +20,7 @@ namespace DirectoryProject.Entity
         public bool IsActive { get; set; }
         public string? OTP { get; set; }
         public DateTime? OTPExpire { get; set; }
+        public string? IdCard { get; set; }
 
     }
 }
