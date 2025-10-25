@@ -116,7 +116,7 @@
                 </div>
 
                 <!-- Page Size & Pagination -->
-                <div class="d-flex justify-content-between align-items-center mt-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3">
                     <div>
                         <label>
                             Show
@@ -228,27 +228,55 @@
             $("#tableInfo").text(`Showing ${start + 1} to ${Math.min(end, filteredData.length)} of ${filteredData.length} entries`);
         }
 
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-            const pagination = $("#pagination");
-            pagination.empty();
+            function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        const pagination = $("#pagination");
+        pagination.empty();
 
-            if (totalPages <= 1) return;
+        if (totalPages <= 1) return;
 
-            pagination.append(`<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                                  <a class="page-link" href="#">Prev</a>
-                               </li>`);
+        // Determine how many page buttons to show based on screen size
+        let maxVisiblePages;
+        if (window.innerWidth < 576) maxVisiblePages = 3;      // mobile
+        else if (window.innerWidth < 768) maxVisiblePages = 5; // tablet
+        else maxVisiblePages = 9;                              // desktop
 
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.append(`<li class="page-item ${i === currentPage ? 'active' : ''}">
-                                      <a class="page-link" href="#">${i}</a>
-                                   </li>`);
-            }
+        pagination.append(`<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                              <a class="page-link" href="#">Prev</a>
+                           </li>`);
 
-            pagination.append(`<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                                  <a class="page-link" href="#">Next</a>
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Adjust if we’re near the end
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // Add ellipsis if needed
+        if (startPage > 1) {
+            pagination.append(`<li class="page-item"><a class="page-link" href="#">1</a></li>`);
+            if (startPage > 2)
+                pagination.append(`<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.append(`<li class="page-item ${i === currentPage ? 'active' : ''}">
+                                  <a class="page-link" href="#">${i}</a>
                                </li>`);
         }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1)
+                pagination.append(`<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`);
+            pagination.append(`<li class="page-item"><a class="page-link" href="#">${totalPages}</a></li>`);
+        }
+
+        pagination.append(`<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                              <a class="page-link" href="#">Next</a>
+                           </li>`);
+    }
+
 
         $(document).on("click", "#pagination .page-link", function (e) {
             e.preventDefault();
