@@ -21,6 +21,6 @@ namespace DirectoryProject.Entity
         public string? OTP { get; set; }
         public DateTime? OTPExpire { get; set; }
         public string? IdCard { get; set; }
-
+        public bool IsAdmin { get; set; }
     }
 }

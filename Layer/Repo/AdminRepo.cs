@@ -197,6 +197,7 @@ namespace DirectoryProject.Layer.Repo
                                 users.RegNo = model.RegNo;
                                 users.MobileNo = model.MobileNo;
                                 users.IsActive = model.IsActive;
+                                users.IsAdmin = model.IsAdmin;
                                 _dbContext.SaveChanges();
                                 respData.Success = true;
                             }
@@ -224,6 +225,7 @@ namespace DirectoryProject.Layer.Repo
                             users.RegNo = model.RegNo;
                             users.MobileNo = model.MobileNo;
                             users.IsActive = model.IsActive;
+                            users.IsAdmin = model.IsAdmin;
                             await _dbContext.UsersMasters.AddAsync(users);
                             _dbContext.SaveChanges();
                             respData.Success = true;

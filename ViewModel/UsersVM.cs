@@ -13,5 +13,6 @@
         public string? GTMDANo { get; set; }
         public bool IsActive { get; set; }
         public IFormFile? file { get; set; }
+        public bool IsAdmin { get; set; }
     }
 }

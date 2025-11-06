@@ -58,7 +58,7 @@ namespace DirectoryProject.Controllers
             ViewBag.IdCard = HttpContext.Session.GetString("IdCard");
             return View();
         }
-        #region [Destination Methods]
+        #region [Users Methods]
         [HttpGet]
         public async Task<IActionResult> users()
         {

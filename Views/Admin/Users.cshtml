@@ -9,6 +9,7 @@
     <meta charset="UTF-8">
     <title>User Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </head>
@@ -44,6 +45,10 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
     }
+
+    .validation-error {
+        font-size: 0.8rem;
+    }
 </style>
 <body class="bg-light">
 
@@ -54,10 +59,10 @@
                 <!-- Left Buttons -->
                 <div class="d-flex gap-2">
                     <a href="/Admin/Index" class="btn btn-sm btn-light text-primary fw-bold">
-                        <i class="fa fa-home me-1"></i> Home
+                        <i class="fas fa-home me-1"></i> Home
                     </a>
                     <a href="/Admin/PageDirectory" class="btn btn-sm btn-light text-primary fw-bold">
-                        <i class="fa fa-folder-open me-1"></i> Directory
+                        <i class="fas fa-folder-open me-1"></i> Directory
                     </a>
                 </div>
 
@@ -65,7 +70,7 @@
                 <div class="d-flex align-items-center gap-3">
                     <h4 class="mb-0">User Management</h4>
                     <button class="btn btn-sm btn-light text-primary fw-bold" onclick="openUserModal()">
-                        <i class="fa fa-plus me-1"></i> Add User
+                        <i class="fas fa-plus me-1"></i> Add User
                     </button>
                 </div>
             </div>
@@ -83,6 +88,7 @@
                                 <th scope="col">RegNo</th>
                                 <th scope="col">GTMDANo</th>
                                 <th scope="col">Photo</th>
+                                <th scope="col">Admin</th>
                                 <th scope="col">Active</th>
                                 <th scope="col">Actions</th>
                             </tr>
@@ -107,8 +113,13 @@
                                             {
                                                 <img src="@user.ProfilePhoto" style="width:50px; height:50px; object-fit:cover; border-radius:50%;" />
                                             }
+                                            else
+                                            {
+                                                <span>No Photo</span>
+                                            }
                                         </td>
-                                        <td>@(user.IsActive ? "Yes" : "No")</td>
+                                        <td style="@(user.IsAdmin ? "color:green" : "color:red")">@(user.IsAdmin ? "Yes" : "No")</td>
+                                        <td style="@(user.IsActive ? "color:green" : "color:red")">@(user.IsActive ? "Yes" : "No")</td>
                                         <td>
                                             <button class="btn btn-sm btn-info" onclick="editUser(@user.Id)">Edit</button>
                                             <button class="btn btn-sm btn-danger" onclick="deleteUser(@user.Id)">Delete</button>
@@ -119,7 +130,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="11" class="text-center text-danger">No users found.</td>
+                                    <td colspan="12" class="text-center text-danger">No users found.</td>
                                 </tr>
                             }
 
@@ -130,15 +141,12 @@
         </div>
     </div>
 
-
-
-
     <!-- User Modal -->
     <div class="modal fade" id="userModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header text-white" style="background-color:#53a0d8;">
-                    <h5 class="modal-title">User</h5>
+                    <h5 class="modal-title" id="modalTitle">Add User</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -174,17 +182,24 @@
                                 <input type="text" id="GTMDANo" class="form-control" required />
                             </div>
                             <div class="mb-3 col-md-6">
-                                <label>Profile Photo <span class="text-danger">*</span></label>
-                                <input type="file" id="ProfilePhoto" class="form-control" required />
+                                <label>Profile Photo</label>
+                                <input type="file" id="ProfilePhoto" class="form-control" accept="image/*" />
                                 <img id="previewPhoto" src="" alt="" class="mt-2" style="width:150px; display:none;" />
+                                <div id="currentPhoto" class="mt-1" style="display:none;">
+                                    <small class="text-muted">Current Photo:</small>
+                                    <img id="currentPhotoImg" src="" style="width:50px; height:50px; object-fit:cover; border-radius:50%;" />
+                                </div>
                             </div>
                             <div class="mb-3 col-md-6 form-check mt-4">
-                                <input type="checkbox" id="IsActive" class="form-check-input" required />
-                                <label class="form-check-label">Is Active <span class="text-danger">*</span></label>
+                                <input type="checkbox" id="IsAdmin" class="form-check-input" />
+                                <label class="form-check-label">Is Admin</label>
+                            </div>
+                            <div class="mb-3 col-md-6 form-check mt-4">
+                                <input type="checkbox" id="IsActive" class="form-check-input" checked />
+                                <label class="form-check-label">Is Active</label>
                             </div>
                         </div>
                     </form>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" onclick="saveUser()" style="background-color:#53a0d8;">Save</button>
@@ -193,11 +208,9 @@
             </div>
         </div>
     </div>
-</body>
-</html>
 
-    @section Scripts {
-    <script>
+    <script type="text/javascript">
+        // Photo preview functionality
         document.getElementById("ProfilePhoto").addEventListener("change", function(event) {
             var file = event.target.files[0];
             if (file) {
@@ -206,93 +219,81 @@
                     var img = document.getElementById("previewPhoto");
                     img.src = e.target.result;
                     img.style.display = "block";
+                    // Hide current photo when new one is selected
+                    $("#currentPhoto").hide();
                 }
                 reader.readAsDataURL(file);
             }
         });
-    </script>
-    <script>
-        // $(document).ready(function () {
-        //     loadUsers();
-        // });
 
-        // function loadUsers() {
-        //     $.get("/Admin/users", function(res){
-        //         let rows = "";
-        //         $.each(res.data, function(i, user){
-        //             rows += `<tr>
-        //                         <td>${i+1}</td>
-        //                         <td>${user.name}</td>
-        //                         <td>${user.email}</td>
-        //                         <td>${user.mobileNo}</td>
-        //                         <td>${user.dob || ""}</td>
-        //                         <td>${user.qualification || ""}</td>
-        //                         <td>${user.regNo || ""}</td>
-        //                         <td>${user.gtmdano || ""}</td>
-        //                         <td>${user.profilePhoto ? `<img src="${user.profilePhoto}" width="50"/>` : ""}</td>
-        //                         <td>${user.isActive ? "Yes" : "No"}</td>
-        //                         <td>
-        //                             <button class="btn btn-sm btn-info" onclick="editUser(${user.id})">Edit</button>
-        //                             <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete</button>
-        //                         </td>
-        //                     </tr>`;
-        //         });
-        //         $("#userTable tbody").html(rows);
-        //     });
-        // }
-
-        function openUserModal(){
+        function openUserModal() {
             $("#UserId").val("");
             $("#userForm")[0].reset();
             $("#previewPhoto").hide();
+            $("#currentPhoto").hide();
+            $("#modalTitle").text("Add User");
+            $("#IsActive").prop("checked", true);
+            $("#IsAdmin").prop("checked", false);
+            $(".validation-error").remove();
             $("#userModal").modal("show");
         }
 
-                function editUser(id){
-                debugger
-            $.post("/Admin/GetUserbyId", { Id: id }, function(res){
-                if(res.success){
-                    let u = res.data; 
-                    $("#UserId").val(u.Id);
-                    $("#Name").val(u.Name);
-                    $("#Email").val(u.Email);
-                    $("#MobileNo").val(u.MobileNo);
-                    $("#DOB").val(u.DOB);
-                    $("#Qualification").val(u.Qualification);
-                    $("#RegNo").val(u.RegNo);
-                    $("#GTMDANo").val(u.GTMDANo);
-                    if(u.ProfilePhoto) {
-                        $("#ProfilePhoto").val(u.ProfilePhoto);
-                        $("#previewPhoto").attr("src", u.ProfilePhoto).show();
-                    } else {
-                        $("#previewPhoto").hide();
+        function editUser(id) {
+            debugger
+            $.post("/Admin/GetUserbyId", { Id: id }, function(res) {
+                if (res.success) {
+                    let u = res.data;
+                    $("#UserId").val(u.id);
+                    $("#Name").val(u.name);
+                    $("#Email").val(u.email);
+                    $("#MobileNo").val(u.mobileNo);
+                    if(u.dob != undefined && u.dob != null){
+                        $("#DOB").val(u.dob.split('T')[0]); // Format date for input
                     }
-                    $("#IsActive").prop("checked", u.IsActive);
+                    $("#Qualification").val(u.qualification);
+                    $("#RegNo").val(u.regNo);
+                    $("#GTMDANo").val(u.gtmdaNo);
+
+                    // Handle photo display
+                    $("#previewPhoto").hide();
+                    if (u.profilePhoto) {
+                        $("#currentPhotoImg").attr("src", u.profilePhoto);
+                        $("#currentPhoto").show();
+                    } else {
+                        $("#currentPhoto").hide();
+                    }
+
+                    $("#IsActive").prop("checked", u.isActive);
+                    $("#IsAdmin").prop("checked", u.isAdmin);
+                    $("#modalTitle").text("Edit User");
+                    $(".validation-error").remove();
                     $("#userModal").modal("show");
                 } else {
-                    alert(res.Message || "User not found");
+                    alert(res.message || "User not found");
                 }
+            }).fail(function() {
+                alert("Error fetching user data");
             });
         }
 
-
-        function saveUser(){
+        function saveUser() {
             $(".validation-error").remove();
 
             let isValid = true;
 
-            // Required fields
-            $("#userForm input[required]").each(function(){
-                if(!$(this).val()){
+            // Required fields validation
+            const requiredFields = ["Name", "Email", "MobileNo", "DOB", "Qualification", "RegNo", "GTMDANo"];
+            requiredFields.forEach(function(field) {
+                if (!$("#" + field).val().trim()) {
                     isValid = false;
-                    $(this).after('<span class="validation-error text-white bg-danger p-1 rounded mt-1 d-block">This field is required</span>');
+                    $("#" + field).after('<span class="validation-error text-white bg-danger p-1 rounded mt-1 d-block">This field is required</span>');
                 }
             });
 
-            if(!isValid) return; // Stop submit if validation fails
+            if (!isValid) return;
 
             let formData = new FormData();
-            formData.append("Id", parseInt($("#UserId").val()) || 0);
+            formData.append("Id", $("#UserId").val() || 0);
             formData.append("Name", $("#Name").val());
             formData.append("Email", $("#Email").val());
             formData.append("MobileNo", $("#MobileNo").val());
@@ -301,44 +302,56 @@
             formData.append("RegNo", $("#RegNo").val());
             formData.append("GTMDANo", $("#GTMDANo").val());
             formData.append("IsActive", $("#IsActive").is(":checked"));
+            formData.append("IsAdmin", $("#IsAdmin").is(":checked"));
 
-                if($("#ProfilePhoto")[0].files.length > 0){
-            formData.append("file", $("#ProfilePhoto")[0].files[0]);
-        }
+            // Append file if selected
+            if ($("#ProfilePhoto")[0].files.length > 0) {
+                formData.append("file", $("#ProfilePhoto")[0].files[0]);
+            }
 
             $.ajax({
                 url: "/Admin/CreateUser",
                 type: "POST",
                 data: formData,
-                contentType: false,  // must for FormData
-                processData: false,    // important for FormData
-                success: function(res){
+                contentType: false,
+                processData: false,
+                success: function(res) {
                     if (res.success) {
                         $("#userModal").modal("hide");
-
+                        alert("User saved successfully!");
+                        // Reload the page to see changes
                         setTimeout(function() {
-                            loadUsers();
+                            location.reload();
                         }, 1000);
-                        else {
-                                    alert(res.message || "Something went wrong");
-                                }
-                            }
+                    } else {
+                        alert(res.message || "Something went wrong");
+                    }
+                },
+                error: function() {
+                    alert("Error saving user");
+                }
             });
         }
 
-
-        function deleteUser(id){
-            if(confirm("Are you sure?")){
-                $.post("/Admin/DeleteUserById", { id: id }, function(res){
-                    if(res.success){
-                        loadUsers();
+        function deleteUser(id) {
+            if (confirm("Are you sure you want to delete this user?")) {
+                $.post("/Admin/DeleteUserById", { id: id }, function(res) {
+                    if (res.success) {
+                        alert("User deleted successfully!");
+                        location.reload();
                     } else {
                         alert(res.message || "Delete failed");
                     }
+                }).fail(function() {
+                    alert("Error deleting user");
                 });
             }
         }
+
+        // Page reload function (if you want to use AJAX reload instead of full page reload)
+        function loadUsers() {
+            location.reload();
+        }
     </script>
-}
-
-
+</body>
+</html>

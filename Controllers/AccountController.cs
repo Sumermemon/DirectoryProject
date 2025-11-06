@@ -30,6 +30,7 @@ namespace DirectoryProject.Controllers
                 if (string.IsNullOrEmpty(email))
                     return Json(new { success = false, message = "Email required" });
 
+                
                 var exist = await _dbContext.UsersMasters.FirstOrDefaultAsync(x => x.Email == email);
                 if (exist == null)
                 {
@@ -47,7 +48,20 @@ namespace DirectoryProject.Controllers
                 mail.From = new MailAddress(_config.GetSection("Email:FromAddress")!.Value!, _config.GetSection("Email:FromName").Value);
                 mail.To.Add(email);
                 mail.Subject = "Your OTP Code";
-                mail.Body = $"Your OTP is {otp}";
+                mail.Body = $@"
+                    Hello,
+
+                    Your One-Time Password (OTP) for verification is: {otp}
+
+                    This OTP is valid for 5 minutes and will expire at {DateTime.Now.AddMinutes(5):hh:mm tt}.
+
+                    Please do not share this OTP with anyone for security reasons.
+
+                    If you didn't request this OTP, please ignore this email.
+
+                    Best regards,
+                    Gujarat Tharadi Memon Doctor Association";
+                mail.IsBodyHtml = false;
 
                 using (var smtp = new SmtpClient(_config.GetSection("Email:SmtpHost").Value, Convert.ToInt32(_config.GetSection("Email:SmtpPort").Value)))
                 {
@@ -80,10 +94,11 @@ namespace DirectoryProject.Controllers
                 {
                     return Json(new { success = false, message = "Invalid or expired OTP" });
                 }
+                bool isAdmin = user.IsAdmin;
                 HttpContext.Session.SetString("Id", user.Id.ToString());
                 HttpContext.Session.SetString("UserEmail", email);
                 HttpContext.Session.SetString("IdCard", user.IdCard??"");
-                return Json(new { success = true });
+                return Json(new { success = true,IsAdmin = isAdmin });
             }
             return Json(new { success = false, message = "Invalid or expired OTP" });
         }
